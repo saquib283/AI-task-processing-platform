@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aitask-config
+data:
+  NODE_ENV: "production"
+  PORT: "4000"
+  REDIS_HOST: "redis-svc"
+  REDIS_PORT: "6379"
+  MONGODB_URI: "mongodb://mongo-svc:27017/aitaskplatform"
+  CORS_ORIGIN: "https://aitaskflow.example.com"
+  RATE_LIMIT_AUTH_MAX: "5"
+  RATE_LIMIT_AUTH_WINDOW_MS: "60000"
+  RATE_LIMIT_API_MAX: "30"
+  RATE_LIMIT_API_WINDOW_MS: "60000"
+  WORKER_CONCURRENCY: "5"
+  NEXT_PUBLIC_API_URL: "https://api.aitaskflow.example.com/api"

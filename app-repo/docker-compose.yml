@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # ─── MongoDB ─────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: aitask-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aitask-network
+
+  # ─── Redis ──────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: aitask-redis
+    ports:
+      - '6379:6379'
+    command: redis-server --maxmemory-policy noeviction
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aitask-network
+
+  # ─── Backend API ────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aitask-backend
+    ports:
+      - '4000:4000'
+    environment:
+      PORT: 4000
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/aitaskplatform
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: docker-dev-jwt-secret-change-in-prod-minimum-32-chars
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_SECRET: docker-dev-refresh-secret-change-in-prod
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CORS_ORIGIN: http://localhost:3000
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aitask-network
+
+  # ─── Python Worker ─────────────────────────────────────────
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    container_name: aitask-worker
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/aitaskplatform
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      WORKER_CONCURRENCY: 5
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aitask-network
+
+  # ─── Frontend ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api
+    container_name: aitask-frontend
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api
+    depends_on:
+      - backend
+    networks:
+      - aitask-network
+
+volumes:
+  mongo_data:
+
+networks:
+  aitask-network:
+    driver: bridge

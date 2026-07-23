@@ -1,0 +1,8 @@
+{
+  "name": "AI TaskFlow",
+  "short_name": "TaskFlow",
+  "icons": [],
+  "theme_color": "#6366F1",
+  "background_color": "#F8FAFC",
+  "display": "standalone"
+}

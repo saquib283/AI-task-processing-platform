@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aitask-production
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/your-org/aitask-infra.git
+    targetRevision: main
+    path: overlays/production
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aitask-production
+
+  # Production uses manual sync — requires explicit approval
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

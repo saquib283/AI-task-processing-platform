@@ -1,0 +1,72 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: aitask-staging
+
+resources:
+  - ../../base
+
+namePrefix: stg-
+
+patches:
+  # Reduce replicas for staging
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: Deployment
+      name: worker
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  # Lower resource limits for staging
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 250m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 256Mi
+  # Disable HPA in staging
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: worker-hpa
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+      - op: replace
+        path: /spec/maxReplicas
+        value: 2
+
+# Override staging-specific config
+configMapGenerator:
+  - name: aitask-config
+    behavior: merge
+    literals:
+      - NODE_ENV=staging
+      - CORS_ORIGIN=https://staging.aitaskflow.example.com
+      - NEXT_PUBLIC_API_URL=https://api-staging.aitaskflow.example.com/api
+
+images:
+  - name: aitaskplatform/backend
+    newTag: latest
+  - name: aitaskplatform/frontend
+    newTag: latest
+  - name: aitaskplatform/worker
+    newTag: latest
