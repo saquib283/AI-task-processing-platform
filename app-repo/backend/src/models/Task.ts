@@ -76,12 +76,10 @@ const taskSchema = new Schema<ITaskDocument>(
   }
 );
 
-// Compound index for fast dashboard queries: user's tasks sorted by newest first
-// Supports the primary query pattern: GET /tasks?userId=X&sort=-createdAt
-// At ~100k tasks/day, this index ensures O(log n) lookups without full collection scans
+// Index for fetching user tasks sorted by newest first
 taskSchema.index({ userId: 1, createdAt: -1 });
 
-// Index for filtering by status across all tasks (used by admin/monitoring)
+// Index for filtering tasks by status
 taskSchema.index({ status: 1, createdAt: -1 });
 
 export const Task = mongoose.model<ITaskDocument>('Task', taskSchema);

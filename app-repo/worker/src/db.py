@@ -20,7 +20,7 @@ def get_database() -> Database:
 
     # Verify connection
     _client.admin.command("ping")
-    print("✅ Worker connected to MongoDB")
+    print("Worker connected to MongoDB")
 
     return _db
 

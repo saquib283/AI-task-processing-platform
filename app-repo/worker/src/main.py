@@ -23,7 +23,7 @@ _shutdown_event = asyncio.Event()
 
 def _handle_signal(sig, frame):
     """Handle shutdown signals gracefully."""
-    print(f"\n🛑 Received signal {sig}. Shutting down gracefully...")
+    print(f"\nReceived signal {sig}. Shutting down gracefully...")
     _shutdown_event.set()
 
 
@@ -38,7 +38,7 @@ async def main():
     try:
         get_database()
     except Exception as e:
-        print(f"❌ Failed to connect to MongoDB: {e}")
+        print(f"Failed to connect to MongoDB: {e}")
         sys.exit(1)
 
     # Create BullMQ worker
@@ -54,14 +54,10 @@ async def main():
         },
     )
 
-    print(f"""
-╔════════════════════════════════════════════════╗
-║  🐍 AI Task Worker                            ║
-║  Queue: task-processing                       ║
-║  Concurrency: {str(config.WORKER_CONCURRENCY).ljust(33)}║
-║  Redis: {redis_url.ljust(39)}║
-╚════════════════════════════════════════════════╝
-    """)
+    print(
+        f"AI Task Worker started | Queue: task-processing | "
+        f"Concurrency: {config.WORKER_CONCURRENCY} | Redis: {redis_url}"
+    )
 
     # Wait for shutdown signal
     await _shutdown_event.wait()

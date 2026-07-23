@@ -27,4 +27,4 @@ taskQueue.on('error', (err) => {
   console.error('Redis queue error:', err);
 });
 
-console.log('✅ Redis queue initialized');
+console.log('Redis queue initialized');

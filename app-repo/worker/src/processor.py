@@ -36,21 +36,21 @@ async def process_job(job, job_token) -> str:
     operation_type = job.data.get("operationType")
     input_text = job.data.get("inputText")
 
-    print(f"📥 Processing job {job.id} | Task: {task_id} | Op: {operation_type}")
+    print(f"Processing job {job.id} | Task: {task_id} | Op: {operation_type}")
 
     try:
-        # ── Idempotency check ──────────────────────────────────────
+        # Idempotency check
         task = db.tasks.find_one({"_id": ObjectId(task_id)})
         if not task:
-            print(f"⚠️  Task {task_id} not found in database. Skipping.")
+            print(f"Task {task_id} not found in database. Skipping.")
             return "skipped: task not found"
 
         if task.get("status") in ("success", "failed"):
-            # Task already processed (duplicate delivery); skip silently
-            print(f"⏭️  Task {task_id} already in terminal state: {task['status']}. Skipping.")
+            # Skip if already in a terminal state
+            print(f"Task {task_id} already in terminal state: {task['status']}. Skipping.")
             return f"skipped: already {task['status']}"
 
-        # ── Transition to running ──────────────────────────────────
+        # Transition to running state
         _append_log(db, task_id, "Started processing")
 
         db.tasks.update_one(
@@ -63,7 +63,7 @@ async def process_job(job, job_token) -> str:
             },
         )
 
-        # ── Validate input ─────────────────────────────────────────
+        # Validate input
         _append_log(db, task_id, "Validating input")
 
         if not input_text or not isinstance(input_text, str):
@@ -72,12 +72,12 @@ async def process_job(job, job_token) -> str:
         if not operation_type:
             raise ValueError("Operation type is missing")
 
-        # ── Process ────────────────────────────────────────────────
+        # Execute operation
         _append_log(db, task_id, f"Processing operation: {operation_type}")
 
         result = execute_operation(operation_type, input_text)
 
-        # ── Success ────────────────────────────────────────────────
+        # Record success
         _append_log(db, task_id, "Completed successfully")
 
         db.tasks.update_one(
@@ -91,13 +91,13 @@ async def process_job(job, job_token) -> str:
             },
         )
 
-        print(f"✅ Task {task_id} completed successfully")
+        print(f"Task {task_id} completed successfully")
         return result
 
     except Exception as exc:
-        # ── Failure ────────────────────────────────────────────────
+        # Handle failure
         error_msg = f"Failed with error: {str(exc)}"
-        print(f"❌ Task {task_id} failed: {exc}")
+        print(f"Task {task_id} failed: {exc}")
 
         try:
             _append_log(db, task_id, error_msg)
@@ -112,6 +112,6 @@ async def process_job(job, job_token) -> str:
                 },
             )
         except Exception as db_err:
-            print(f"❌ Failed to update task status in DB: {db_err}")
+            print(f"Failed to update task status in DB: {db_err}")
 
         raise exc

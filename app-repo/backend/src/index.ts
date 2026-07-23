@@ -12,7 +12,7 @@ import './config/queue';
 
 const app = express();
 
-// ─── Security Middleware ─────────────────────────────────────────
+// Security middleware
 app.use(helmet());
 app.use(cors({
   origin: config.cors.origin,
@@ -21,11 +21,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// ─── Body Parsing ────────────────────────────────────────────────
+// Body parsing
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
-// ─── Health Check ────────────────────────────────────────────────
+// Health check
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
@@ -34,16 +34,16 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
-// ─── API Routes ──────────────────────────────────────────────────
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// ─── 404 Handler ─────────────────────────────────────────────────
+// 404 handler
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// ─── Global Error Handler ────────────────────────────────────────
+// Global error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Unhandled error:', err);
 
@@ -58,13 +58,13 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     return;
   }
 
-  // Mongoose cast error (invalid ObjectId)
+  // Invalid ObjectId format
   if (err.name === 'CastError') {
     res.status(400).json({ error: 'Invalid ID format' });
     return;
   }
 
-  // MongoDB duplicate key error
+  // MongoDB duplicate key
   if ((err as any).code === 11000) {
     res.status(409).json({ error: 'Duplicate entry. This resource already exists.' });
     return;
@@ -77,18 +77,12 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// ─── Start Server ────────────────────────────────────────────────
+// Start server
 async function start() {
   await connectDatabase();
 
   app.listen(config.port, () => {
-    console.log(`
-╔════════════════════════════════════════════════╗
-║  🚀 AI Task Platform API                      ║
-║  Running on port ${config.port}                       ║
-║  Environment: ${config.nodeEnv.padEnd(30)}║
-╚════════════════════════════════════════════════╝
-    `);
+    console.log(`AI Task Platform API running on port ${config.port} (${config.nodeEnv})`);
   });
 }
 

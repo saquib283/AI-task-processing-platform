@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # ─── MongoDB ─────────────────────────────────────────────────
+  # MongoDB
   mongo:
     image: mongo:7
     container_name: aitask-mongo
@@ -17,7 +17,7 @@ services:
     networks:
       - aitask-network
 
-  # ─── Redis ──────────────────────────────────────────────────
+  # Redis
   redis:
     image: redis:7-alpine
     container_name: aitask-redis
@@ -32,7 +32,7 @@ services:
     networks:
       - aitask-network
 
-  # ─── Backend API ────────────────────────────────────────────
+  # Backend API
   backend:
     build:
       context: ./backend
@@ -59,7 +59,7 @@ services:
     networks:
       - aitask-network
 
-  # ─── Python Worker ─────────────────────────────────────────
+  # Python Worker
   worker:
     build:
       context: ./worker
@@ -78,7 +78,7 @@ services:
     networks:
       - aitask-network
 
-  # ─── Frontend ──────────────────────────────────────────────
+  # Frontend
   frontend:
     build:
       context: ./frontend

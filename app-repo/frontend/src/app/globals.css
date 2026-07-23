@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ─── Custom Animations ──────────────────────────────────────── */
+/* Custom animations */
 @keyframes slide-up {
   from {
     opacity: 0;
@@ -59,12 +59,12 @@
   animation: fade-in 0.15s ease-out;
 }
 
-/* ─── Base Styles ─────────────────────────────────────────────── */
+/* Base styles */
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
 
-/* ─── Scrollbar ───────────────────────────────────────────────── */
+/* Scrollbar styles */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

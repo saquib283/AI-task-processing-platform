@@ -10,7 +10,7 @@ infra-repo/
 │   ├── kustomization.yaml
 │   ├── namespace.yaml
 │   ├── configmap.yaml
-│   ├── secret.yaml              # ⚠️ Template only — never commit real values
+│   ├── secret.yaml              # Template only - do not commit real credentials
 │   ├── mongo-statefulset.yaml
 │   ├── redis-deployment.yaml
 │   ├── backend-deployment.yaml

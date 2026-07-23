@@ -1,9 +1,9 @@
 {
+  "venvPath": "app-repo/worker",
+  "venv": ".venv",
   "executionEnvironments": [
     {
       "root": "app-repo/worker",
-      "venvPath": "app-repo/worker",
-      "venv": ".venv",
       "extraPaths": [
         "app-repo/worker/src"
       ]
